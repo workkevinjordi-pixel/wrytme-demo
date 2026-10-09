@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000" id="themeColor">
+<meta name="color-scheme" content="dark light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wrytme">
+<meta name="format-detection" content="telephone=no">
+<title>Wrytme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;600&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  --stage-bg:#EDE5D4; --stage-ink:#2A2118; --stage-dim:#857A68; --stage-line:rgba(42,33,24,.14);
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --mono:'Courier Prime',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{--stage-bg:#0E0C09;--stage-ink:#EDE6D8;--stage-dim:#8F8677;--stage-line:rgba(237,230,216,.14);}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,a,.sheet,.tile,.row{touch-action:manipulation}
+.content{overscroll-behavior:contain}
+body{margin:0;min-height:100vh;background:var(--stage-bg);color:var(--stage-ink);font-family:var(--serif);
+  display:flex;flex-direction:column;align-items:center;gap:16px;padding:28px 16px 40px;}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+
+/* ---------- stage ---------- */
+.stage-head{text-align:center;max-width:420px}
+.stage-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stage-dim);margin:0 0 6px}
+.stage-sub{font-size:14px;line-height:1.5;color:var(--stage-dim);margin:0;font-style:italic}
+.stage-toggle{display:flex;gap:0;border:1px solid var(--stage-line);border-radius:999px;padding:3px}
+.stage-toggle button{border:0;background:none;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:999px;color:var(--stage-dim)}
+.stage-toggle button[aria-pressed=true]{background:var(--stage-ink);color:var(--stage-bg)}
+.stage-foot{font-family:var(--mono);font-size:11px;color:var(--stage-dim);text-align:center;max-width:340px;line-height:1.5}
+
+/* ---------- phone ---------- */
+.phone{position:relative;width:min(100%,372px);aspect-ratio:372/780;border-radius:46px;padding:10px;background:#000;
+  box-shadow:0 0 0 1.5px #3a352c,0 40px 70px -28px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.2)}
+.screen-wrap{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:var(--bg);color:var(--text);transition:background .35s,color .35s}
+.phone[data-mood=electric]{
+  --bg:#000; --bg2:#0b0a09; --text:#F1EDE3; --dim:#9A9384; --faint:#5d5850; --line:rgba(255,255,255,.1);
+  --gold:#E8B923; --gold-ink:#1A1200; --hunch:#F23CB0; --paper-shadow:none;
+  --rose:#FF3B6E;--blue:#3B93FF;--green:#2BD99F;--violet:#B878FF; --field:#0d0c0b;
+}
+.phone[data-mood=paper]{
+  --bg:#F6F0E4; --bg2:#EFE7D6; --text:#2A2118; --dim:#7C705E; --faint:#B3A78F; --line:rgba(42,33,24,.14);
+  --gold:#B8860B; --gold-ink:#2A1C00; --hunch:#B0207F; --field:#FBF7EE;
+  --rose:#C23A5B;--blue:#3A78C2;--green:#2E8F70;--violet:#8A5FC4;
+}
+/* grain */
+.screen-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:50;mix-blend-mode:multiply;opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .15 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.phone[data-mood=electric] .screen-wrap::after{mix-blend-mode:screen;opacity:.16;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- shell ---------- */
+.app{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:14px}
+.screen{display:none;min-height:100%;flex-direction:column;animation:settle .32s ease both}
+.screen.on{display:flex}
+@keyframes settle{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content{flex:1;overflow-y:auto;scrollbar-width:none;position:relative}
+.content::-webkit-scrollbar{display:none}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;flex-shrink:0;min-height:60px}
+.tl{display:flex;align-items:center;gap:10px}
+.wordmark{font-style:italic;font-weight:400;font-size:25px;letter-spacing:-.01em;font-variation-settings:"SOFT" 100,"WONK" 1}
+.tlabel{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.back{border:0;background:none;display:flex;align-items:center;gap:6px;padding:4px 0;font-style:italic;font-size:15px;color:var(--dim)}
+.back svg{width:16px;height:16px}
+
+/* Pip seal */
+.seal{display:block}
+.pen{width:44px;height:44px;border:0;background:none;padding:0;position:relative;flex-shrink:0;transition:transform .2s}
+.pen:hover{transform:rotate(-8deg) scale(1.05)}
+.pen .nib{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.pen .nib svg{width:27px;height:27px}
+.phone[data-mood=electric] .pen .nib svg{filter:drop-shadow(0 0 6px rgba(232,185,35,.45))}
+
+/* nav */
+.nav{display:flex;flex-shrink:0;padding:6px 14px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent)}
+.nav button{flex:1;border:0;background:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);padding:8px 0 9px;position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;transition:color .2s}
+.nav .ni{width:23px;height:23px;display:block}
+.nav button.on .ni{filter:drop-shadow(0 0 0 transparent)}
+.nav button.on{color:var(--text);font-weight:700}
+.nav button .ul{position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);width:34px;height:6px;color:var(--gold);opacity:0;transition:opacity .2s}
+.nav button.on .ul{opacity:1}
+.nav .star{position:absolute;top:2px;right:calc(50% - 22px);width:16px;height:16px}
+.nav .star svg{width:16px;height:16px;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.14)}}
+
+.label{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:22px 22px 10px}
+.hand{font-family:'Caveat',cursive;font-weight:600}
+
+/* ---------- Entry sheets ---------- */
+.c-rose{--c:#FF3B6E;--w:#F7C6CF;--ink:#8A1F3E}
+.c-blue{--c:#3B93FF;--w:#BCD6F2;--ink:#1F4E8A}
+.c-green{--c:#2BD99F;--w:#BDE6D3;--ink:#1B6B52}
+.c-violet{--c:#B878FF;--w:#DCCBF0;--ink:#5B3A8E}
+.c-gold{--c:#E8B923;--w:#F1DE9C;--ink:#6B4B00}
+
+.spread{display:grid;grid-template-columns:1fr 1fr;gap:20px 14px;padding:10px 18px 30px;align-items:start}
+.sheet{grid-column:span 1;position:relative;text-align:left;border:0;padding:20px 17px 18px;isolation:isolate;transform:rotate(var(--r,0deg));transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet:hover,.sheet:focus-visible{transform:rotate(0) translateY(-3px) scale(1.012);outline:none}
+.sheet.wide{grid-column:span 2}
+.sheet h3{margin:0 0 8px;line-height:1.02;font-weight:500;letter-spacing:-.015em;text-wrap:balance;font-variation-settings:"SOFT" 60,"WONK" 1}
+.sheet.wide h3{font-size:36px}
+.sheet:not(.wide) h3{font-size:21px}
+.sheet p{margin:0;font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.sheet.wide p{-webkit-line-clamp:4;font-size:14.5px}
+.sheet.md p{-webkit-line-clamp:6}
+.sheet.sm p{-webkit-line-clamp:3}
+.sheet .meta{display:block;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.stag{margin-top:26px}
+
+/* Paper: stationery */
+.phone[data-mood=paper] .sheet::before{content:"";position:absolute;inset:0;z-index:-1;filter:url(#deckle);
+  background:linear-gradient(165deg,color-mix(in srgb,var(--w) 72%,#fff) 0%,var(--w) 100%);
+  box-shadow:0 1px 1px rgba(60,40,15,.25),0 14px 20px -12px rgba(60,40,15,.45)}
+.phone[data-mood=paper] .sheet h3{color:var(--ink)}
+.phone[data-mood=paper] .sheet p{color:color-mix(in srgb,var(--ink) 70%,#2A2118)}
+.phone[data-mood=paper] .sheet .meta{color:color-mix(in srgb,var(--ink) 65%,transparent)}
+/* tape */
+.phone[data-mood=paper] .sheet.wide::after{content:"";position:absolute;top:-9px;left:50%;width:62px;height:20px;margin-left:-31px;transform:rotate(-2deg);
+  background:rgba(255,248,214,.62);box-shadow:0 1px 2px rgba(60,40,15,.2);backdrop-filter:blur(1px);z-index:2}
+
+/* Electric: lit from behind */
+.phone[data-mood=electric] .sheet::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:3px;
+  background:radial-gradient(130% 80% at 50% 118%,color-mix(in srgb,var(--c) 34%,transparent),transparent 62%),#070606;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent),0 18px 44px -18px color-mix(in srgb,var(--c) 75%,transparent),inset 0 1px 0 rgba(255,255,255,.07)}
+.phone[data-mood=electric] .sheet h3{color:var(--c);text-shadow:0 0 10px color-mix(in srgb,var(--c) 70%,transparent),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
+.phone[data-mood=electric] .sheet p{color:#CFC9BC}
+.phone[data-mood=electric] .sheet .meta{color:color-mix(in srgb,var(--c) 75%,#888)}
+
+/* ---------- full entry (letter) ---------- */
+.letter-wrap{padding:6px 14px 34px}
+.letter{position:relative;padding:34px 26px 28px;isolation:isolate;transform:rotate(-.35deg)}
+.phone[data-mood=paper] .letter::before{content:"";position:absolute;inset:0;z-index:-1;filter:url(#deckle);
+  background:linear-gradient(170deg,color-mix(in srgb,var(--w) 60%,#fff),var(--w));box-shadow:0 1px 1px rgba(60,40,15,.25),0 20px 30px -16px rgba(60,40,15,.5)}
+.phone[data-mood=electric] .letter::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:3px;
+  background:radial-gradient(120% 55% at 50% 105%,color-mix(in srgb,var(--c) 30%,transparent),transparent 65%),#070606;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 28%,transparent),0 26px 60px -24px color-mix(in srgb,var(--c) 80%,transparent)}
+.letter .when{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;display:block}
+.phone[data-mood=paper] .letter .when{color:color-mix(in srgb,var(--ink) 60%,transparent)}
+.phone[data-mood=electric] .letter .when{color:color-mix(in srgb,var(--c) 70%,#888)}
+.letter h2{font-size:42px;line-height:.98;margin:0 0 20px;font-weight:500;letter-spacing:-.02em;text-wrap:balance;font-variation-settings:"SOFT" 70,"WONK" 1}
+.phone[data-mood=paper] .letter h2{color:var(--ink)}
+.phone[data-mood=electric] .letter h2{color:var(--c);text-shadow:0 0 14px color-mix(in srgb,var(--c) 70%,transparent),0 0 40px color-mix(in srgb,var(--c) 40%,transparent)}
+.letter p{font-size:14.5px;line-height:1.5;margin:0}
+.phone[data-mood=paper] .phone[data-mood=paper] .letter p{color:color-mix(in srgb,var(--ink) 55%,#2A2118)}
+.phone[data-mood=electric] .letter p{color:#DAD4C7}
+.letter .sig{margin-top:22px;font-size:22px;color:var(--ink)}
+.phone[data-mood=electric] .letter .sig{color:var(--c)}
+.reply-row{display:flex;flex-direction:column;gap:12px;padding:22px 24px 0}
+
+/* buttons */
+.btn{border:0;padding:15px 18px;font-size:15px;font-weight:500;width:100%;text-align:center;letter-spacing:.01em;position:relative;transition:transform .15s,filter .2s;border-radius:3px}
+.btn:active{transform:scale(.985)}
+.btn.gold{background:linear-gradient(180deg,#F2CB4B,#D9A81A);color:var(--gold-ink);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 8px 18px -8px rgba(232,185,35,.7)}
+.phone[data-mood=paper] .btn.gold{background:linear-gradient(180deg,#D9A52A,#B8860B);color:#fff8e0;box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 8px 16px -8px rgba(120,80,0,.6)}
+.btn.hunch{background:var(--hunch);color:#fff;box-shadow:0 8px 20px -8px var(--hunch)}
+.btn.line{background:transparent;color:var(--text);box-shadow:0 0 0 1px var(--line) inset;font-style:italic}
+.btn.line:hover{box-shadow:0 0 0 1px var(--dim) inset}
+.btn.pill-rose{background:var(--rose);color:#fff}
+.phone[data-mood=electric] .btn.pill-rose{color:#1a0509;box-shadow:0 0 24px -4px var(--rose)}
+.btn:focus-visible,.pen:focus-visible,.nav button:focus-visible,.back:focus-visible,.tab:focus-visible,.chip:focus-visible,.row:focus-visible,.sheet:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* ---------- composers ---------- */
+.compose{padding:4px 22px 28px;display:flex;flex-direction:column;gap:16px}
+.hint{font-size:13px;font-style:italic;color:var(--dim);line-height:1.5;margin:0}
+.paper-field{position:relative;padding:20px 18px 14px;isolation:isolate}
+.paper-field::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--field);border-radius:3px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 29px,color-mix(in srgb,var(--text) 10%,transparent) 29px,color-mix(in srgb,var(--text) 10%,transparent) 30px);
+  background-position:0 20px;background-repeat:repeat-y;
+  box-shadow:0 0 0 1px var(--line),0 12px 24px -14px rgba(0,0,0,.4)}
+.phone[data-mood=electric] .paper-field::before{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 29px,rgba(255,255,255,.06) 29px,rgba(255,255,255,.06) 30px)}
+textarea{width:100%;min-height:150px;resize:none;border:0;background:transparent;outline:0;font-size:19px;line-height:30px;padding:0;color:var(--text);font-family:var(--serif)}
+textarea::placeholder{color:var(--faint);font-style:italic}
+.field-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)}
+.mic{width:38px;height:38px;border-radius:50%;border:0;background:none;box-shadow:0 0 0 1px var(--line) inset;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+.mic svg{width:16px;height:16px}
+.mic.live{color:var(--hunch);box-shadow:0 0 0 1px var(--hunch) inset,0 0 14px var(--hunch)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-width:48px;height:44px;padding:0 14px;border:0;background:none;box-shadow:0 0 0 1px var(--line) inset;border-radius:3px;font-size:19px;color:var(--text)}
+.chip.on{box-shadow:0 0 0 1.5px var(--gold) inset;color:var(--gold)}
+.chip.hue{min-width:0;width:44px;padding:0;position:relative;box-shadow:none;background:none}
+.chip.hue::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--hc)}
+.phone[data-mood=electric] .chip.hue::after{box-shadow:0 0 12px var(--hc)}
+.chip.hue.on{box-shadow:0 0 0 1.5px var(--text) inset;border-radius:50%}
+.chip[data-f=italic]{font-style:italic}
+.chip[data-f=hand]{font-family:'Caveat',cursive;font-size:23px}
+.chip[data-f=type]{font-family:var(--mono);font-size:16px}
+.chip[data-f=sans]{font-family:'DM Sans',sans-serif;font-size:17px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:0;background:none;box-shadow:0 0 0 1px var(--line) inset;padding:12px 10px 11px;text-align:left;border-radius:3px;display:flex;flex-direction:column;gap:2px;color:var(--text)}
+.opt b{font-size:16px;font-weight:500}
+.opt small{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim)}
+.opt.on{box-shadow:0 0 0 1.5px var(--gold) inset}
+.opt.on b{color:var(--gold)}
+.opt.hunchy.on{box-shadow:0 0 0 1.5px var(--hunch) inset}
+.opt.hunchy.on b{color:var(--hunch)}
+
+/* ---------- Pip connection ---------- */
+.intro{padding:6px 18px 30px}
+.note{position:relative;padding:26px 24px 26px;isolation:isolate;transform:rotate(.5deg)}
+.phone[data-mood=paper] .note::before{content:"";position:absolute;inset:0;z-index:-1;filter:url(#deckle);background:linear-gradient(170deg,#FFFBEF,#F3E9CF);box-shadow:0 1px 1px rgba(60,40,15,.25),0 22px 30px -16px rgba(60,40,15,.5)}
+.phone[data-mood=electric] .note::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:3px;background:radial-gradient(120% 60% at 50% 110%,color-mix(in srgb,var(--glow,#E8B923) 26%,transparent),transparent 65%),#070606;box-shadow:0 0 0 1px color-mix(in srgb,var(--glow,#E8B923) 30%,transparent),0 24px 50px -22px color-mix(in srgb,var(--glow,#E8B923) 70%,transparent)}
+.note.is-hunch{--glow:#F23CB0}
+.note .from{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:8px}
+.note .name{font-size:44px;font-weight:500;line-height:1;margin:14px 0 4px;letter-spacing:-.02em;font-variation-settings:"SOFT" 80,"WONK" 1}
+.note .where{font-style:italic;color:var(--dim);font-size:14px;margin-bottom:20px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;padding:4px 9px;border-radius:2px;margin-bottom:16px}
+.tag.sure{background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold)}
+.tag.hunch{background:color-mix(in srgb,var(--hunch) 20%,transparent);color:var(--hunch)}
+.quote{font-size:20px;line-height:1.45;font-style:italic;margin:0 0 14px;text-wrap:pretty;font-variation-settings:"SOFT" 100}
+.honest{font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--dim);margin:0 0 20px}
+.honest b{font-size:15px}
+.unc{height:3px;background:var(--line);margin:0 0 20px;position:relative;border-radius:2px}
+.unc i{position:absolute;left:0;top:0;bottom:0;background:var(--hunch);border-radius:2px;box-shadow:0 0 10px var(--hunch)}
+.lnk{display:inline-block;font-style:italic;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;color:var(--dim);margin-bottom:22px;background:none;border:0;padding:0;font-size:15px}
+.seal-big{position:absolute;right:14px;top:16px;width:54px;height:54px;transform:rotate(12deg);filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+.phone[data-mood=electric] .seal-big{filter:drop-shadow(0 0 16px rgba(232,185,35,.55))}
+.note.is-hunch .seal-big{filter:hue-rotate(255deg) saturate(1.3) drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+
+.unlocked{padding:8px 24px 30px;display:flex;flex-direction:column;gap:12px}
+.unlocked h2{font-size:44px;font-weight:500;margin:6px 0 0;letter-spacing:-.02em;line-height:1;font-variation-settings:"SOFT" 80,"WONK" 1}
+.cards-ex{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.mini-cards{display:flex;margin:6px 0 14px}
+.mini-cards i{width:44px;height:58px;border-radius:2px;margin-right:-14px;box-shadow:0 6px 10px -4px rgba(0,0,0,.4);transform:rotate(var(--r));background:var(--cc)}
+.phone[data-mood=paper] .mini-cards i{box-shadow:0 6px 10px -4px rgba(60,40,15,.45)}
+.sublink{background:none;border:0;font-style:italic;font-size:14px;color:var(--dim);text-decoration:underline;text-underline-offset:4px;margin-top:10px;align-self:center}
+
+/* rating */
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 30px 50px;text-align:center}
+.center h2{font-size:30px;font-weight:400;line-height:1.1;margin:0 0 10px;font-style:italic;text-wrap:balance}
+.center .hint{max-width:26ch;margin-bottom:28px}
+.stars{display:flex;gap:6px}
+.stars button{border:0;background:none;padding:2px;transition:transform .15s}
+.stars button:hover{transform:scale(1.15) rotate(-6deg)}
+.stars svg{width:34px;height:34px;display:block}
+
+/* ---------- table ---------- */
+.tabs{display:flex;gap:18px;padding:0 22px 6px;overflow-x:auto;scrollbar-width:none}
+.tab{border:0;background:none;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:6px 0 8px;position:relative;white-space:nowrap}
+.tab.on{color:var(--text);font-weight:700}
+.tab.on::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--gold);border-radius:2px}
+.plus{width:36px;height:36px;border:0;background:none;box-shadow:0 0 0 1px var(--line) inset;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:300;line-height:1;color:var(--text)}
+.rows{padding:10px 14px 24px}
+.row{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:14px 8px;text-align:left;border-bottom:1px solid var(--line);position:relative}
+.row .mono{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-style:italic;color:var(--c);border-radius:50% 46% 52% 48%;
+  box-shadow:0 0 0 1.5px var(--c) inset}
+.phone[data-mood=electric] .row .mono{text-shadow:0 0 10px var(--c);box-shadow:0 0 0 1.5px var(--c) inset,0 0 14px -2px var(--c)}
+.row .nm{font-size:19px;font-weight:500;line-height:1.15}
+.row .pv{font-size:13px;color:var(--dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.row .grow{flex:1;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px var(--rose)}
+.phone[data-mood=paper] .dot{box-shadow:none}
+.row .chev{color:var(--faint);font-size:20px}
+.thread-tabs{display:flex;gap:6px;padding:0 20px 10px}
+.thread-tabs .tab{flex:1;text-align:center;padding:8px 0}
+.slips{padding:10px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.slip{max-width:80%;padding:12px 15px 11px;font-size:16px;line-height:1.4;position:relative;isolation:isolate}
+.slip small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;margin-top:6px;opacity:.65;text-transform:uppercase}
+.slip.in{align-self:flex-start;transform:rotate(-.6deg);background:var(--field);box-shadow:0 0 0 1px var(--line),0 8px 14px -10px rgba(0,0,0,.45);border-radius:2px 14px 14px 14px}
+.slip.out{align-self:flex-end;transform:rotate(.5deg);background:color-mix(in srgb,var(--rose) 82%,#fff);color:#2a0710;border-radius:14px 2px 14px 14px;box-shadow:0 8px 14px -10px rgba(0,0,0,.5)}
+.phone[data-mood=electric] .slip.out{background:#1a0509;color:var(--rose);box-shadow:0 0 0 1px color-mix(in srgb,var(--rose) 60%,transparent),0 0 24px -8px var(--rose);text-shadow:0 0 8px color-mix(in srgb,var(--rose) 60%,transparent)}
+.composer-row{display:flex;align-items:center;gap:10px;padding:8px 18px 4px;margin-top:auto}
+.composer-in{flex:1;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 0 0 1px var(--line) inset;border-radius:22px;color:var(--faint);font-style:italic;font-size:15px}
+.composer-in svg{width:18px;height:18px;color:var(--dim)}
+
+/* ---------- You ---------- */
+.you-top{padding:6px 22px 0;display:flex;align-items:center;gap:16px}
+.portrait{width:74px;height:74px;border-radius:50% 45% 52% 48%;box-shadow:0 0 0 1px var(--line) inset;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--faint);position:relative}
+.portrait svg{width:30px;height:30px}
+.portrait .cam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--bg);box-shadow:0 0 0 1px var(--line) inset;display:flex;align-items:center;justify-content:center}
+.portrait .cam svg{width:13px;height:13px}
+.you-top h2{font-size:26px;font-weight:400;font-style:italic;margin:0}
+.you-top small{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.mood{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 22px}
+.mood button{border:0;background:none;padding:12px 0 11px;font-size:17px;font-style:italic;box-shadow:0 0 0 1px var(--line) inset;border-radius:3px;color:var(--dim)}
+.mood button.on{box-shadow:0 0 0 1.5px var(--gold) inset;color:var(--gold)}
+.archive{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 22px 8px}
+button.tile{border:0;text-align:left;color:inherit;font:inherit}
+.tile[data-e]{cursor:pointer;transition:transform .25s}
+.tile[data-e]:hover{transform:rotate(0) translateY(-2px)}
+.tile{position:relative;padding:14px 13px 12px;aspect-ratio:1/.82;display:flex;flex-direction:column;justify-content:space-between;isolation:isolate;transform:rotate(var(--r,0))}
+.phone[data-mood=paper] .tile::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--w);filter:url(#deckle);box-shadow:0 8px 14px -10px rgba(60,40,15,.5)}
+.phone[data-mood=electric] .tile::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:2px;background:radial-gradient(120% 90% at 50% 120%,color-mix(in srgb,var(--c) 38%,transparent),transparent 70%),#070606;box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent),0 12px 28px -14px var(--c)}
+.tile h4{margin:0;font-size:17px;font-weight:500;line-height:1.08;letter-spacing:-.01em}
+.phone[data-mood=paper] .tile h4{color:var(--ink)}
+.phone[data-mood=electric] .tile h4{color:var(--c);text-shadow:0 0 10px color-mix(in srgb,var(--c) 60%,transparent)}
+.reads{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+.phone[data-mood=paper] .reads{color:color-mix(in srgb,var(--ink) 70%,transparent)}
+.phone[data-mood=electric] .reads{color:color-mix(in srgb,var(--c) 70%,#999)}
+.reads svg{width:14px;height:14px}
+.lines .row .nm{font-size:20px;font-weight:400}
+.lines .row{padding:15px 6px}
+
+/* ---------- signup ---------- */
+.signup{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:30px 26px 34px;overflow:hidden}
+.signup .big{font-style:italic;font-size:68px;line-height:.9;letter-spacing:-.03em;font-weight:400;margin:0 0 14px;font-variation-settings:"SOFT" 100,"WONK" 1}
+.signup .big em{color:var(--gold);font-style:normal}
+.phone[data-mood=electric] .signup .big em{text-shadow:0 0 22px rgba(232,185,35,.6)}
+.signup .lede{font-size:18px;line-height:1.4;margin:0 0 28px;color:var(--dim);max-width:22ch}
+.glow-orb{position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none}
+.phone[data-mood=paper] .glow-orb{opacity:.6;mix-blend-mode:multiply}
+.tiers{display:grid;gap:10px;margin-bottom:18px}
+.tier{border:0;background:none;text-align:left;padding:14px 16px;box-shadow:0 0 0 1px var(--line) inset;border-radius:3px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative;z-index:1}
+.tier.on{box-shadow:0 0 0 1.5px var(--gold) inset}
+.tier b{font-size:19px;font-weight:500;display:block;margin-bottom:2px}
+.tier span{font-size:13px;font-style:italic;color:var(--dim);line-height:1.35}
+.tier .chk{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--gold);opacity:0}
+.tier.on .chk{opacity:1}
+
+/* ---------- Meet up / invite ---------- */
+.stack{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px 28px 60px;text-align:center}
+.ring{width:176px;height:176px;position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.ring svg.r{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring .face{width:132px;height:132px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:56px;font-style:italic;color:#fff;
+  background:radial-gradient(circle at 35% 30%,#d58bff,#5d3a9e 60%,#241046)}
+.ring .secs{position:absolute;bottom:-4px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--blue);background:var(--bg);padding:2px 10px;border-radius:10px}
+.verify-ring{width:148px;height:148px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--blue);box-shadow:0 0 0 1.5px var(--blue) inset;margin-bottom:6px;position:relative}
+.phone[data-mood=electric] .verify-ring{box-shadow:0 0 0 1.5px var(--blue) inset,0 0 36px -4px var(--blue)}
+.verify-ring svg{width:54px;height:54px}
+.blue-t{color:var(--blue);font-size:26px;font-style:italic;margin:0}
+.btn.blue{background:var(--blue);color:#fff}
+.phone[data-mood=electric] .btn.blue{color:#021224;box-shadow:0 0 24px -6px var(--blue)}
+.check-seal{width:92px;height:92px;position:relative}
+.check-seal svg.seal{width:92px;height:92px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.phone[data-mood=electric] .check-seal svg.seal{filter:drop-shadow(0 0 22px rgba(232,185,35,.6))}
+.check-seal .ck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#2b1d00}
+.check-seal .ck svg{width:38px;height:38px}
+.stack h2{margin:0;font-size:30px;font-weight:400;font-style:italic;line-height:1.1}
+.fade-gone{animation:gone 1.2s ease both}
+@keyframes gone{to{opacity:0;filter:blur(18px);transform:scale(.9)}}
+
+/* ---------- drawers / toast ---------- */
+.veil{position:absolute;inset:0;z-index:60;display:flex;align-items:flex-end;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.drawer{width:100%;padding:26px 22px 32px;background:var(--bg);border-radius:18px 18px 0 0;animation:rise .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 -1px 0 var(--line)}
+@keyframes rise{from{transform:translateY(30px);opacity:0}}
+.drawer h3{font-size:30px;font-style:italic;font-weight:400;margin:0 0 18px;letter-spacing:-.01em}
+.dopt{display:flex;justify-content:space-between;align-items:baseline;width:100%;border:0;background:none;padding:16px 0;border-top:1px solid var(--line);text-align:left;font-size:22px;color:var(--c)}
+.phone[data-mood=electric] .dopt{text-shadow:0 0 12px color-mix(in srgb,var(--c) 55%,transparent)}
+.dopt small{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);text-shadow:none}
+.dopt.plain{color:var(--text);text-shadow:none!important}
+.dclose{display:block;margin:12px auto 0;border:0;background:none;font-style:italic;color:var(--dim);font-size:15px}
+.toast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:70;background:color-mix(in srgb,var(--bg) 93%,transparent);color:var(--text);box-shadow:0 0 0 1px var(--line),0 8px 20px -12px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:9px 16px;font-size:13px;font-style:italic;text-align:center;border-radius:999px;width:max-content;max-width:calc(100% - 56px);opacity:.92;animation:toastIn .3s ease both}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body[data-mood=electric]{--m-bg:#000}
+body[data-mood=paper]{--m-bg:#F6F0E4}
+@media (hover:none){
+  .sheet:hover,.sheet:focus-visible{transform:rotate(var(--r,0deg))}
+  .tile[data-e]:hover{transform:rotate(var(--r,0deg))}
+  .pen:hover,.stars button:hover{transform:none}
+  .sheet:active,.tile[data-e]:active{transform:rotate(var(--r,0deg)) scale(.985)}
+  .btn:active,.row:active,.opt:active,.chip:active{opacity:.85}
+}
+/* Phone-sized screens: the app IS the screen. No frame, no stage chrome,
+   fills the dynamic viewport, respects notch / home-indicator insets. */
+@media (max-width:560px){
+  html,body{height:100%;overflow:hidden}
+  body{display:block;padding:0;gap:0;min-height:100vh;min-height:100dvh;background:var(--m-bg,#000)}
+  .stage-head,.stage-toggle,.stage-foot{display:none}
+  .phone{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;aspect-ratio:auto;border-radius:0;padding:0;background:var(--bg);box-shadow:none}
+  .screen-wrap{border-radius:0}
+  .app{padding-top:calc(env(safe-area-inset-top,0px) + 6px)}
+  .signup{padding-top:calc(30px + env(safe-area-inset-top,0px));padding-bottom:calc(34px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  .drawer{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+  .topbar{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .mic{width:44px;height:44px}
+  .tab{min-height:44px}
+  .back{min-height:44px;min-width:44px}
+  .row{min-height:56px}
+  .opt,.tier,.mood button{min-height:48px}
+}
+@media (max-width:560px) and (max-height:700px){
+  .signup .big{font-size:54px}
+  .signup .lede{margin-bottom:18px;font-size:16px}
+  .tier{padding:11px 14px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="deckle" x="-3%" y="-3%" width="106%" height="106%">
+    <feTurbulence type="fractalNoise" baseFrequency=".045 .06" numOctaves="3" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <defs>
+    <radialGradient id="sealG" cx="35%" cy="30%" r="85%">
+      <stop offset="0" stop-color="#F6D45E"/><stop offset=".6" stop-color="#E5B31F"/><stop offset="1" stop-color="#C8960F"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<div class="stage-head">
+  <p class="stage-eyebrow">Interactive demo · Wrytme</p>
+  <p class="stage-sub">Tap through. Switch Electric / Paper any time, it is the same letter by day and by lamplight.</p>
+</div>
+<div class="stage-toggle" role="group" aria-label="Mood">
+  <button data-mood-set="electric" aria-pressed="true">Electric</button>
+  <button data-mood-set="paper" aria-pressed="false">Paper</button>
+</div>
+
+<div class="phone" id="phone" data-mood="electric">
+<div class="screen-wrap">
+
+  <!-- SIGN UP -->
+  <section class="signup" id="signup">
+    <div class="glow-orb" style="background:#B878FF;top:-90px;right:-110px"></div>
+    <div class="glow-orb" style="background:#FF3B6E;top:120px;left:-170px;width:260px;height:260px;opacity:.35"></div>
+    <h1 class="big">wrytme<em>.</em></h1>
+    <p class="lede">Be found for your words, not your face.</p>
+    <div class="tiers">
+      <button class="tier on" data-tier="free"><div><b>Free</b><span>Sign up, verify, and receive your first connection from Pip.</span></div><i class="chk">CHOSEN</i></button>
+      <button class="tier" data-tier="paid"><div><b>Paid</b><span>Priority introductions and deeper features.</span></div><i class="chk">CHOSEN</i></button>
+    </div>
+    <button class="btn gold" id="signupBtn">Begin writing →</button>
+  </section>
+
+  <!-- APP -->
+  <div class="app" id="app" hidden>
+    <header class="topbar">
+      <div class="tl" id="tl"></div>
+      <div class="tr" id="tr"></div>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- DISCOVER -->
+      <section class="screen" data-s="discover">
+        <div class="spread">
+          <button class="sheet wide c-rose" style="--r:-.7deg" data-e="0"><h3>I quit today.</h3><p>No plan. No backup. Everyone keeps asking what the plan is, like silence has to be filled with a map. For once I'm letting it stay empty.</p><span class="meta">a stranger · 2h</span></button>
+          <button class="sheet md c-blue" style="--r:1.1deg" data-e="1"><h3>Porch light.</h3><p>A stranger's dog decided we were friends. Didn't ask my name once. Some nights the easiest company is the kind that doesn't talk back.</p><span class="meta">a stranger · 5h</span></button>
+          <button class="sheet sm c-green stag" style="--r:-1deg" data-e="2"><h3>Turned down the raise.</h3><p>Slept fine. Two coffee cups on the counter this morning instead of one.</p><span class="meta">a stranger · 6h</span></button>
+          <button class="sheet wide c-violet" style="--r:.5deg" data-e="3"><h3>Learned to whistle again.</h3><p>Thirty years since anyone taught me, and I'm still off-key, but the dog at the corner store stops every time now.</p><span class="meta">a stranger · 9h</span></button>
+        </div>
+      </section>
+
+      <!-- ENTRY -->
+      <section class="screen" data-s="entry">
+        <div class="letter-wrap">
+          <article class="letter" id="letter">
+            <span class="when" id="eWhen">a stranger · 2h</span>
+            <h2 id="eTitle"></h2>
+            <p id="eBody"></p>
+          </article>
+          <div class="reply-row">
+            <button class="btn gold" id="sendCard">Send a Card</button>
+            <button class="btn line" id="sendNote">Send a private note</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- POST -->
+      <section class="screen" data-s="post">
+        <div class="compose">
+          <p class="hint">This will be visible to everyone on Discover.</p>
+          <div class="paper-field">
+            <textarea id="postText" placeholder="Whatever's true right now…"></textarea>
+            <div class="field-foot"><span id="draftSt">draft saved</span>
+              <button class="mic" data-mic aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button></div>
+          </div>
+          <div><div class="label" style="margin:0 0 10px">Choose a voice</div>
+            <div class="chips" id="fonts">
+              <button class="chip on" data-f="serif">Aa</button><button class="chip" data-f="italic">Aa</button><button class="chip" data-f="hand">Aa</button><button class="chip" data-f="type">Aa</button><button class="chip" data-f="sans">Aa</button>
+            </div></div>
+          <div><div class="label" style="margin:0 0 10px">Choose a color</div>
+            <div class="chips" id="hues">
+              <button class="chip hue on" data-c="rose" style="--hc:#FF3B6E" aria-label="Rose"></button><button class="chip hue" data-c="blue" style="--hc:#3B93FF" aria-label="Blue"></button><button class="chip hue" data-c="green" style="--hc:#2BD99F" aria-label="Green"></button><button class="chip hue" data-c="violet" style="--hc:#B878FF" aria-label="Violet"></button><button class="chip hue" data-c="gold" style="--hc:#E8B923" aria-label="Gold"></button>
+            </div></div>
+          <p class="hint">Once posted, it lives in Your Archive. Only you can see how many have read it.</p>
+          <button class="btn pill-rose" id="postIt">Post it</button>
+        </div>
+      </section>
+
+      <!-- PIP -->
+      <section class="screen" data-s="pip">
+        <div class="compose">
+          <div><div class="label" style="margin:0 0 10px">Where may Pip look?</div>
+            <div class="pair" id="locRow">
+              <button class="opt" data-loc="nearby"><b>Nearby</b><small>close enough to meet</small></button>
+              <button class="opt on" data-loc="anywhere"><b>Anywhere</b><small>the whole world</small></button>
+            </div></div>
+          <div><div class="label" style="margin:0 0 10px">How should I look?</div>
+            <div class="pair" id="modeRow">
+              <button class="opt" data-mode="sure"><b>Sure Thing</b><small>safest match</small></button>
+              <button class="opt hunchy on" data-mode="hunch"><b>Hunch</b><small>a surprising one</small></button>
+            </div></div>
+          <div class="paper-field">
+            <textarea id="pipText" style="min-height:120px" placeholder="Fifty words to start."></textarea>
+            <div class="field-foot"><span id="cnt">0 of 50 words</span>
+              <button class="mic" data-mic aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button></div>
+          </div>
+          <p class="hint">Location only narrows where Pip looks. It never decides who fits you.</p>
+          <button class="btn gold" id="connectBtn">Connect</button>
+        </div>
+      </section>
+
+      <!-- PIP CONNECTION -->
+      <section class="screen" data-s="pip-connection">
+        <div class="intro">
+          <div class="note is-hunch" id="note">
+            <svg class="seal seal-big" data-seal="star" viewBox="0 0 100 100"></svg>
+            <div class="from">A note from Pip</div>
+            <div class="name" id="cName">Mara</div>
+            <div class="where">Portugal</div>
+            <span class="tag hunch" id="cTag">HUNCH</span>
+            <p class="quote" id="cReason"></p>
+            <div class="unc" id="cBar"><i style="width:40%"></i></div>
+            <p class="honest" id="cHonest"></p>
+            <button class="lnk" data-stub="Her writing">Read Mara's writing</button>
+            <button class="btn hunch" id="cCard">Send a Card</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- UNLOCKED -->
+      <section class="screen" data-s="unlocked">
+        <div class="unlocked">
+          <div class="cards-ex">✓ Cards exchanged</div>
+          <h2 id="uName">Mara</h2>
+          <div class="mini-cards"><i style="--cc:#F7C6CF;--r:-8deg"></i><i style="--cc:#BCD6F2;--r:-2deg"></i><i style="--cc:#F1DE9C;--r:4deg"></i><i style="--cc:#DCCBF0;--r:10deg"></i></div>
+          <button class="btn line" id="goChat">Chat, unlocked</button>
+          <button class="btn line" id="goMeet">Meet Up</button>
+          <button class="btn gold" id="goInvite">Invite to Table</button>
+          <button class="sublink" id="goRate">Rate this connection (demo)</button>
+        </div>
+      </section>
+
+      <!-- RATING -->
+      <section class="screen" data-s="rating">
+        <div class="center">
+          <h2>How did Pip do with this one?</h2>
+          <p class="hint">Mara · connected 3 months ago. Private. Only aggregate signal ever reaches Pip.</p>
+          <div class="stars" id="stars"></div>
+        </div>
+      </section>
+
+      <!-- MEET UP -->
+      <section class="screen" data-s="meetup">
+        <div class="stack" id="meetStack"></div>
+      </section>
+
+      <!-- INVITE SENT -->
+      <section class="screen" data-s="invite">
+        <div class="stack">
+          <div class="check-seal"><svg class="seal" data-seal="plain" viewBox="0 0 100 100"></svg><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div></div>
+          <h2 id="invTxt">Invite sent to Mara.</h2>
+          <p class="hint">She needs to accept too.</p>
+        </div>
+      </section>
+
+      <!-- TABLE -->
+      <section class="screen" data-s="table">
+        <div class="tabs"><button class="tab on">All</button><button class="tab" data-stub="Unread">Unread</button><button class="tab" data-stub="Salon">Salon</button><button class="tab" data-stub="Album">Album</button><button class="tab" data-stub="Store">Store</button></div>
+        <div class="rows">
+          <button class="row" data-open="thread" style="--c:var(--rose)"><span class="mono">R</span><span class="grow"><div class="nm">Renata</div><div class="pv">made me smile all morning</div></span><i class="dot"></i></button>
+          <button class="row" data-stub="Family Salon" style="--c:var(--green)"><span class="mono">F</span><span class="grow"><div class="nm">Family Salon</div><div class="pv">that's genuinely beautiful</div></span></button>
+          <button class="row" data-stub="Mom" style="--c:var(--blue)"><span class="mono">M</span><span class="grow"><div class="nm">Mom</div><div class="pv">call me when you land</div></span></button>
+        </div>
+      </section>
+
+      <!-- THREAD -->
+      <section class="screen" data-s="thread">
+        <div class="thread-tabs"><button class="tab on">Note</button><button class="tab" data-stub="Page">Page</button><button class="tab" data-stub="Cards">Cards</button></div>
+        <div class="slips">
+          <div class="slip out">thinking of you today<small>9:41</small></div>
+          <div class="slip in">made me smile all morning<small>9:44</small></div>
+        </div>
+        <div class="composer-row">
+          <div class="composer-in">Write back… <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.2-2h6.6l1.2 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.2"/></svg></div>
+          <button class="mic" data-mic aria-label="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
+        </div>
+      </section>
+
+      <!-- YOU -->
+      <section class="screen" data-s="you">
+        <div class="you-top">
+          <div class="portrait"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="9" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg><span class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.2-2h6.6l1.2 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.2"/></svg></span></div>
+          <div><h2>Just you</h2><small>seen by no one</small></div>
+        </div>
+        <div class="label">Mood</div>
+        <div class="mood"><button data-mood-set="electric" class="on">Electric</button><button data-mood-set="paper">Paper</button></div>
+        <div class="label">Your Archive</div>
+        <div class="archive">
+          <button class="tile c-rose" data-e="0" data-mine style="--r:-1deg"><h4>I quit today.</h4><span class="reads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>740</span></button>
+          <button class="tile c-blue" data-e="1" data-mine style="--r:1.2deg"><h4>Porch light.</h4><span class="reads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>212</span></button>
+          <button class="tile c-green" data-e="2" data-mine style="--r:.8deg"><h4>Turned down the raise.</h4><span class="reads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>390</span></button>
+          <button class="tile c-violet" data-e="3" data-mine style="--r:-.9deg"><h4>Learned to whistle again.</h4><span class="reads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>128</span></button>
+        </div>
+        <div class="rows lines" style="padding-top:14px">
+          <button class="row" data-stub="Starred"><span class="grow"><div class="nm">Starred</div></span><span class="chev">›</span></button>
+          <button class="row" data-stub="Following"><span class="grow"><div class="nm">Following</div></span><span class="chev">›</span></button>
+          <button class="row" data-stub="Journal"><span class="grow"><div class="nm">Journal</div></span><span class="chev">›</span></button>
+          <button class="row" data-stub="Account"><span class="grow"><div class="nm">Account</div></span><span class="chev">›</span></button>
+          <button class="row" data-open="more"><span class="grow"><div class="nm" style="font-style:italic;color:var(--dim)">More</div></span><span class="chev">›</span></button>
+        </div>
+      </section>
+
+      <!-- MORE -->
+      <section class="screen" data-s="more">
+        <div class="rows lines">
+          <button class="row" data-stub="Privacy"><span class="grow"><div class="nm">Privacy</div></span><span class="chev">›</span></button>
+          <button class="row" data-stub="Help"><span class="grow"><div class="nm">Help</div></span><span class="chev">›</span></button>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="nav" id="nav">
+      <button data-tab="discover"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/></svg><span>Discover</span><svg class="ul" viewBox="0 0 34 6"><path d="M1 4.2C8 1.2 15 5.6 22 3c4-1.4 8-1.3 11 .2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="star" id="star" hidden><svg data-seal="star" viewBox="0 0 100 100"></svg></span></button>
+      <button data-tab="table"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11h17M6 11v8.5M18 11v8.5"/><path d="M9.5 11V8.4h5V11M10 8.4c0-1.3.9-1.6.9-2.8M13.4 8.4c0-1.3.9-1.6.9-2.8"/></svg><span>Table</span><svg class="ul" viewBox="0 0 34 6"><path d="M1 4.2C8 1.2 15 5.6 22 3c4-1.4 8-1.3 11 .2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button data-tab="you"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.6" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg><span>You</span><svg class="ul" viewBox="0 0 34 6"><path d="M1 4.2C8 1.2 15 5.6 22 3c4-1.4 8-1.3 11 .2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </nav>
+  </div>
+
+  <!-- write drawer -->
+  <div class="veil" id="writeVeil" hidden>
+    <div class="drawer">
+      <h3>Write something?</h3>
+      <button class="dopt" style="--c:var(--rose)" data-go="post">A post <small>Public</small></button>
+      <button class="dopt" style="--c:var(--gold)" data-go="pip">A letter to Pip <small>Private</small></button>
+      <button class="dopt" style="--c:var(--blue)" id="journalOpt">A journal entry <small>Private</small></button>
+      <button class="dclose" data-close>Never mind</button>
+    </div>
+  </div>
+  <!-- add to table drawer -->
+  <div class="veil" id="addVeil" hidden>
+    <div class="drawer">
+      <h3>Add to the Table</h3>
+      <button class="dopt plain" data-stub="Search" data-close>Search <small>someone on Wrytme</small></button>
+      <button class="dopt plain" data-stub="Invite a Friend" data-close>Invite a Friend <small>not here yet</small></button>
+      <button class="dopt plain" data-stub="New Salon" data-close>New Salon <small>a few people</small></button>
+      <button class="dclose" data-close>Never mind</button>
+    </div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+</div>
+</div>
+
+<p class="stage-foot">Design demo for Wrytme · Pip's reply is a sample, not a live model call.</p>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+  var phone=$('#phone'),content=$('#content'),tl=$('#tl'),tr=$('#tr'),toastEl=$('#toast'),T;
+
+  /* ---- wax seal generator ---- */
+  function sealSVG(kind){
+    var pts=[],n=64,cx=50,cy=50,i,a,r;
+    for(i=0;i<n;i++){a=i/n*Math.PI*2;r=45+Math.sin(i*2.1)*.5+Math.cos(i*3.7)*.4;pts.push((cx+Math.cos(a)*r).toFixed(1)+','+(cy+Math.sin(a)*r).toFixed(1));}
+    var d='M'+pts.join(' L')+'Z';
+    var star='<path d="M50 28l6.6 14 15.2 1.8-11.3 10.4 3 15.1L50 61.8 36.5 69.3l3-15.1L28.2 43.8 43.4 42z" fill="#8a6200" opacity=".55" transform="translate(0,1.2)"/><path d="M50 28l6.6 14 15.2 1.8-11.3 10.4 3 15.1L50 61.8 36.5 69.3l3-15.1L28.2 43.8 43.4 42z" fill="#FFE9A0" opacity=".9"/>';
+    return '<path d="'+d+'" fill="url(#sealG)" stroke="#9a6f08" stroke-opacity=".7" stroke-width=".8" stroke-linejoin="round"/><circle cx="50" cy="50" r="36" fill="none" stroke="#FFF1B8" stroke-opacity=".7" stroke-width="1"/><circle cx="50" cy="50" r="37.2" fill="none" stroke="#8a6200" stroke-opacity=".28" stroke-width=".8"/>'+(kind==='star'?star:'');
+  }
+  $$('[data-seal]').forEach(function(s){s.innerHTML=sealSVG(s.dataset.seal)});
+  var nib='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l4.6 6.4-2 6.6H9.4l-2-6.6z"/><path d="M12 10.4v5.8"/><circle cx="12" cy="9.2" r="1.1"/><path d="M9.2 19.8h5.6"/></svg>';
+  function penBtn(){return '<button class="pen" id="penBtn" aria-label="Write something"><span class="nib">'+nib+'</span></button>'}
+  var backIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+
+  /* ---- data ---- */
+  var entries=[
+    {c:'rose',t:'I quit today.',b:"No plan. No backup. Everyone keeps asking what the plan is, like silence has to be filled with a map. For once I'm letting it stay empty. Turns out quiet isn't the same thing as lost.",w:'2h',reads:740},
+    {c:'blue',t:'Porch light.',b:"A stranger's dog decided we were friends. Turned up on the porch rail like he'd always lived there, didn't ask my name once. Some nights the easiest company is the kind that doesn't talk back.",w:'5h',reads:212},
+    {c:'green',t:'Turned down the raise.',b:"Slept fine. Two coffee cups on the counter this morning instead of one. Eight months in and I still count them like a small, private proof.",w:'6h',reads:390},
+    {c:'violet',t:'Learned to whistle again.',b:"Thirty years since anyone taught me, and I'm still off-key, but the dog at the corner store stops what he's doing every time now. That's enough of an audience.",w:'9h',reads:128}
+  ];
+  var cfg={
+    discover:{tab:'discover',root:'wordmark'},
+    entry:{tab:'discover',back:'discover'},
+    post:{tab:'discover',back:'discover',title:'A post'},
+    pip:{tab:'discover',back:'discover',title:'Letter to Pip'},
+    'pip-connection':{tab:'discover',back:'discover'},
+    unlocked:{tab:'discover',back:'pip-connection'},
+    rating:{tab:'discover',back:'unlocked'},
+    meetup:{tab:'discover',back:'unlocked'},
+    invite:{tab:'discover',back:'unlocked'},
+    table:{tab:'table',root:'Table',plus:true},
+    thread:{tab:'table',back:'table',title:'Renata'},
+    you:{tab:'you',root:'wordmark'},
+    more:{tab:'you',back:'you'}
+  };
+  var cur='signup',meetTimer;
+
+  function go(name){
+    cur=name;
+    $$('.screen').forEach(function(s){s.classList.toggle('on',s.dataset.s===name)});
+    var c=cfg[name];
+    if(c.back){tl.innerHTML='<button class="back" id="backB">'+backIco+'<span>back</span></button>'+(c.title?'<span class="tlabel">'+c.title+'</span>':'')}
+    else if(c.root==='wordmark'){tl.innerHTML='<span class="wordmark">wrytme</span>'}
+    else {tl.innerHTML='<span class="wordmark" style="font-size:30px">'+c.root+'</span>'}
+    tr.innerHTML=(c.plus?'<button class="plus" id="plusB" aria-label="Add to the Table">+</button>':'')+penBtn();
+    tr.style.cssText='display:flex;gap:10px;align-items:center';
+    var b=$('#backB');if(b)b.onclick=function(){go(c.back)};
+    var p=$('#penBtn');p.onclick=function(){$('#writeVeil').hidden=false};
+    var pl=$('#plusB');if(pl)pl.onclick=function(){$('#addVeil').hidden=false};
+    $$('#nav button').forEach(function(x){x.classList.toggle('on',x.dataset.tab===c.tab)});
+    content.scrollTop=0;
+    clearInterval(meetTimer);
+    if(name==='meetup')meetStep1();
+  }
+  function toast(m,ms){toastEl.textContent=m;toastEl.hidden=false;clearTimeout(T);T=setTimeout(function(){toastEl.hidden=true},ms||1600)}
+
+  /* ---- signup ---- */
+  $$('.tier').forEach(function(t){t.onclick=function(){$$('.tier').forEach(function(x){x.classList.toggle('on',x===t)})}});
+  $('#signupBtn').onclick=function(){$('#signup').hidden=true;$('#app').hidden=false;go('discover')};
+
+  /* ---- nav / generic ---- */
+  $$('#nav button').forEach(function(b){b.onclick=function(){go(b.dataset.tab)}});
+  document.addEventListener('click',function(e){
+    var el;
+    if((el=e.target.closest('[data-stub]'))){toast(el.dataset.stub+' · not in this demo')}
+    if((el=e.target.closest('[data-open]'))){go(el.dataset.open)}
+    if((el=e.target.closest('[data-close]'))){$$('.veil').forEach(function(v){v.hidden=true})}
+    if((el=e.target.closest('[data-go]'))){$$('.veil').forEach(function(v){v.hidden=true});go(el.dataset.go)}
+    if(e.target.classList&&e.target.classList.contains('veil'))e.target.hidden=true;
+    if((el=e.target.closest('[data-mic]'))){el.classList.toggle('live');if(el.classList.contains('live'))toast('Listening · speech becomes text, no audio kept',2200)}
+  });
+  $('#journalOpt').onclick=function(){$('#writeVeil').hidden=true;toast('Journal · private, never read by Pip')};
+
+  /* ---- discover → entry ---- */
+  document.addEventListener('click',function(ev){
+    var s=ev.target.closest('[data-e]');if(!s)return;
+    var e=entries[+s.dataset.e],mine=s.hasAttribute('data-mine'),L=$('#letter');
+    L.className='letter c-'+e.c;
+    $('#eTitle').textContent=e.t;$('#eBody').textContent=e.b;
+    $('#eWhen').textContent=mine?'yours · '+(e.reads!=null?e.reads+' reads, only you see this':'posted '+e.w):'a stranger · '+e.w+' ago';
+    $('.reply-row').hidden=mine;
+    go('entry');
+  });
+  $('#sendCard').onclick=function(){toast('Card sent. And one came right back.');setTimeout(function(){setConn('Dara');go('unlocked')},800)};
+  $('#sendNote').onclick=function(){toast('Private note sent · no Pip, no Card')};
+
+  /* ---- post ---- */
+  $$('#fonts .chip').forEach(function(c){c.onclick=function(){
+    $$('#fonts .chip').forEach(function(x){x.classList.toggle('on',x===c)});
+    var ta=$('#postText'),f=c.dataset.f;
+    ta.style.fontFamily=f==='hand'?"'Caveat',cursive":f==='type'?"'Courier Prime',monospace":f==='sans'?"'DM Sans',sans-serif":"var(--serif)";
+    ta.style.fontStyle=f==='italic'?'italic':'normal';
+    ta.style.fontSize=f==='hand'?'25px':f==='type'?'16px':'19px';
+  }});
+  var hue='rose';
+  $$('#hues .hue').forEach(function(h){h.onclick=function(){$$('#hues .hue').forEach(function(x){x.classList.toggle('on',x===h)});hue=h.dataset.c}});
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  $('#postIt').onclick=function(){
+    var raw=$('#postText').value.trim();
+    if(!raw){toast('Write something first');return}
+    var nl=raw.indexOf('\n'),t,b;
+    if(nl>0){t=raw.slice(0,nl).trim();b=raw.slice(nl+1).trim()||raw}
+    else{var w=raw.split(/\s+/);t=w.slice(0,4).join(' ').replace(/[.,;:!?]+$/,'')+(w.length>4?'…':'.');b=raw}
+    var idx=entries.push({c:hue,t:t,b:b,w:'just now',reads:0})-1;
+    var sh=document.createElement('button');
+    sh.className='sheet wide c-'+hue;sh.style.setProperty('--r','-.4deg');sh.dataset.e=idx;
+    sh.innerHTML='<h3>'+esc(t)+'</h3><p>'+esc(b)+'</p><span class="meta">you · just now</span>';
+    $('.spread').insertBefore(sh,$('.spread').firstChild);
+    var eye='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var tile=document.createElement('button');
+    tile.className='tile c-'+hue;tile.style.setProperty('--r','-1.2deg');tile.dataset.e=idx;tile.setAttribute('data-mine','');
+    tile.innerHTML='<h4>'+esc(t)+'</h4><span class="reads">'+eye+'0</span>';
+    var ar=$('.archive');ar.insertBefore(tile,ar.firstChild);
+    $('#postText').value='';
+    toast('Posted · saved to Your Archive',2300);
+    go('discover');
+  };
+
+  /* ---- pip ---- */
+  var mode='hunch';
+  $('#pipText').addEventListener('input',function(){var v=this.value.trim(),n=v?v.split(/\s+/).length:0;$('#cnt').textContent=Math.min(n,50)+' of 50 words'});
+  $$('#locRow .opt').forEach(function(b){b.onclick=function(){$$('#locRow .opt').forEach(function(x){x.classList.toggle('on',x===b)})}});
+  $$('#modeRow .opt').forEach(function(b){b.onclick=function(){$$('#modeRow .opt').forEach(function(x){x.classList.toggle('on',x===b)});mode=b.dataset.mode}});
+  function setConn(name){
+    var h=(mode==='hunch'&&name!=='Dara');
+    $('#cName').textContent=name;$('#uName').textContent=name;
+    $('#note').classList.toggle('is-hunch',h);
+    var tag=$('#cTag');tag.className='tag '+(h?'hunch':'sure');tag.textContent=h?'HUNCH · 40%':'SURE THING';
+    $('#cReason').textContent=h?"“You both write about joy like it might jinx itself if said too plainly. Same restraint, same quiet relief when it slips through anyway.”":"“The voice match here is about as clean as Pip gets. Steady pace, the same dry humor, nothing to hedge.”";
+    $('#cBar').style.display=h?'':'none';
+    $('#cHonest').innerHTML=h?'<b style="color:var(--hunch)">40%</b> sure. Pip says: a genuine pull, but not a sure thing. Read her first.':'Pip is as sure as it gets.';
+    var b=$('#cCard');b.className='btn '+(h?'hunch':'gold');
+    $('#invTxt').textContent='Invite sent to '+name+'.';
+  }
+  $('#connectBtn').onclick=function(){
+    toast('Pip is reading your letter…',1200);
+    setTimeout(function(){setConn(mode==='hunch'?'Mara':'Dara');$('#star').hidden=false;go('pip-connection')},1250);
+  };
+  $('#cCard').onclick=function(){go('unlocked')};
+  $('#goChat').onclick=function(){go('thread')};
+  $('#goMeet').onclick=function(){go('meetup')};
+  $('#goInvite').onclick=function(){go('invite')};
+  $('#goRate').onclick=function(){go('rating')};
+
+  /* ---- meet up (safety flow) ---- */
+  function meetStep1(){
+    var nm=$('#uName').textContent;
+    $('#meetStack').innerHTML='<h2 class="blue-t">Before you meet '+nm+'</h2><div class="verify-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="9" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg></div><p class="hint" style="max-width:26ch">A quick ID re-check. Checked once, then discarded.</p><button class="btn blue" id="confirmMe">Confirm it’s me</button>';
+    $('#confirmMe').onclick=meetStep2;
+  }
+  function meetStep2(){
+    var nm=$('#uName').textContent,left=90,C=2*Math.PI*84;
+    $('#meetStack').innerHTML='<p class="hint">Five minutes before you meet · '+nm+'’s photo, for ninety seconds only.</p><div class="ring" id="ring"><svg class="r" viewBox="0 0 176 176"><circle cx="88" cy="88" r="84" fill="none" stroke="var(--line)" stroke-width="2"/><circle id="arc" cx="88" cy="88" r="84" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="0"/></svg><div class="face">'+nm.charAt(0)+'</div><span class="secs" id="secs">90s</span></div><p class="hint" style="max-width:28ch">Then it is gone for good. This is the only photo Wrytme ever uses to identify anyone. <i>(Sped up for the demo.)</i></p>';
+    meetTimer=setInterval(function(){
+      left--;var a=$('#arc');if(!a){clearInterval(meetTimer);return}
+      a.style.strokeDashoffset=C*(1-left/90);$('#secs').textContent=left+'s';
+      if(left<=0){clearInterval(meetTimer);$('#ring').classList.add('fade-gone');
+        setTimeout(function(){$('#meetStack').innerHTML='<h2>Gone.</h2><p class="hint" style="max-width:26ch">The photo is deleted, not just hidden. Have a lovely time.</p><button class="btn line" id="meetDone" style="max-width:220px">Done</button>';$('#meetDone').onclick=function(){go('unlocked')}},1100)}
+    },110);
+  }
+
+  /* ---- stars ---- */
+  (function(){
+    var f=4,row=$('#stars');
+    function draw(){row.innerHTML='';for(var i=1;i<=5;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label',i+' stars');
+      b.innerHTML='<svg viewBox="0 0 24 24" fill="'+(i<=f?'var(--gold)':'none')+'" stroke="var(--gold)" stroke-width="1.4" stroke-linejoin="round"><path d="M12 2.8l2.8 5.9 6.4.7-4.8 4.4 1.4 6.3L12 17.1l-5.8 3 1.4-6.3-4.8-4.4 6.4-.7z"/></svg>';
+      b.onclick=function(){f=i;draw();toast('Thank you · saved privately')};row.appendChild(b)})(i)}}
+    draw();
+  })();
+
+  /* ---- mood ---- */
+  function setMood(m){
+    phone.dataset.mood=m;document.body.dataset.mood=m;
+    var tc=document.getElementById('themeColor');if(tc)tc.setAttribute('content',m==='paper'?'#F6F0E4':'#000000');
+    $$('[data-mood-set]').forEach(function(b){b.classList.toggle('on',b.dataset.moodSet===m);if(b.closest('.stage-toggle'))b.setAttribute('aria-pressed',b.dataset.moodSet===m)});
+    try{localStorage.setItem('wrytme-mood',m)}catch(e){}
+  }
+  $$('[data-mood-set]').forEach(function(b){b.onclick=function(){setMood(b.dataset.moodSet)}});
+  var saved='electric';try{saved=localStorage.getItem('wrytme-mood')||'electric'}catch(e){}
+  setMood(saved);
+})();
+</script>
+</body>
+</html>
